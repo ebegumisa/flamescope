@@ -77,12 +77,20 @@ def generate_heatmap(filename, file_type, rows=None):
             emptycol.append(0)
         values.append(emptycol)
     # increment heatmap cells
-    for ts in offsets:
-        col = int(floor(ts - floor(start)))
-        row = rows - int(floor(rows * (ts % 1))) - 1
-        values[col][row] += 1
-        if (values[col][row] > maxvalue):
-            maxvalue = values[col][row]
+    if (file_type == 'perf'):
+        for (ts, coeff) in offsets:
+            col = int(floor(ts - floor(start)))
+            row = rows - int(floor(rows * (ts % 1))) - 1
+            values[col][row] += (1 * coeff)
+            if (values[col][row] > maxvalue):
+                maxvalue = values[col][row]
+    else:
+        for ts in offsets:
+            col = int(floor(ts - floor(start)))
+            row = rows - int(floor(rows * (ts % 1))) - 1
+            values[col][row] += 1
+            if (values[col][row] > maxvalue):
+                maxvalue = values[col][row]
 
     heatmap = {}
     heatmap['rows'] = rowoffsets

@@ -32,7 +32,7 @@ def perf_read_offsets(file_path):
 
     stack = ""
     ts = -1
-
+    
     # process perf script output and search for two things:
     # - event_regexp: to identify event timestamps
     # - idle_regexp: for filtering idle stacks
@@ -45,7 +45,10 @@ def perf_read_offsets(file_path):
             if (stack != ""):
                 # process prior stack
                 if (not idle_regexp.search(stack)):
-                    offsets.append(ts)
+                    if (r.group(2) == None):
+                        offsets.append((ts, 1))
+                    else:
+                        offsets.append((ts, float(r.group(2))))
                 # don't try to cache stacks (could be many Gbytes):
                 stack = ""
             ts = float(r.group(1))
@@ -56,7 +59,7 @@ def perf_read_offsets(file_path):
             stack += line.rstrip()
     # last stack
     if (not idle_regexp.search(stack)):
-        offsets.append(ts)
+        offsets.append((ts, 1))
     if (ts > end):
         end = ts
 
