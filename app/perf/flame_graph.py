@@ -77,7 +77,7 @@ def _get_profile_range(file_path):
 
 
 # add a stack to the root tree
-def _add_stack(root, stack, comm):
+def _add_stack(root, stack, comm, coeff):
     last = root
     for i, pair in enumerate(stack):
         # Split inlined frames. "->" is used by software such as java
@@ -105,13 +105,13 @@ def _add_stack(root, stack, comm):
                     found = 1
                     break
             if (found):
-                last['v'] += val
+                last['v'] += val * coeff
             else:
                 newframe = {}
                 newframe['c'] = []
                 newframe['n'] = name
                 newframe['l'] = libtype
-                newframe['v'] = val
+                newframe['v'] = val * coeff
                 last['c'].append(newframe)
                 last = newframe
     return root
@@ -168,6 +168,7 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None):
     # - event_regexp: to identify event timestamps
     # - idle_regexp: for filtering idle stacks
     linenum = -1
+    coeff = 1
     for line in f:
         linenum += 1
         # Performance optimization. Makes a large difference.
@@ -193,11 +194,12 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None):
                     # skip idle
                     stack = []
                 elif (ts >= start and ts <= end):
-                    root = _add_stack(root, stack, comm)
+                    root = _add_stack(root, stack, comm, coeff)
                 stack = []
             ts = float(r.group(1))
             if (ts > end + overscan):
                 break
+            coeff = 1 if r.group(2) == None else float(r.group(2))
             r = comm_regexp.search(line)
             if (r):
                 comm = r.group(1).rstrip()
@@ -215,7 +217,7 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None):
                 stack.insert(1, [name, r.group(2)])
     # last stack
     if (ts >= start and ts <= end):
-        root = _add_stack(root, stack, comm)
+        root = _add_stack(root, stack, comm, coeff)
 
     # close file
     f.close()
