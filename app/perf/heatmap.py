@@ -21,8 +21,6 @@ import collections
 from .regexp import event_regexp, coeff_regexp, idle_regexp
 from app.common.fileutil import get_file
 
-which_heatmap = 'erlang_reductions'
-
 # read and cache offsets
 def perf_read_offsets(file_path):
     start = float("+inf")

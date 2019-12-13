@@ -20,7 +20,7 @@
 from math import ceil, floor
 from os.path import join, getmtime
 from app import config
-from app.perf.heatmap import perf_read_offsets, which_heatmap
+from app.perf.heatmap import perf_read_offsets
 from app.cpuprofile.heatmap import cpuprofile_read_offsets
 from app.nflxprofile.heatmap import nflxprofile_readoffsets
 from app.trace_event.heatmap import trace_event_read_offsets

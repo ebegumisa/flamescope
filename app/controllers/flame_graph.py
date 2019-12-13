@@ -26,11 +26,11 @@ from app.trace_event.flame_graph import trace_event_generate_flame_graph
 from app import config
 
 
-def generate_flame_graph(filename, file_type, range_start, range_end, package_name=False):
+def generate_flame_graph(filename, file_type, range_start, range_end, package_name=False, which='samples'):
     file_path = join(config.PROFILE_DIR, filename)
     mtime = getmtime(file_path)
     if file_type == 'perf':
-        return perf_generate_flame_graph(file_path, range_start, range_end)
+        return perf_generate_flame_graph(file_path, range_start, range_end, which)
     elif file_type == 'cpuprofile':
         return cpuprofile_generate_flame_graph(file_path, range_start, range_end)
     elif file_type == 'trace_event':

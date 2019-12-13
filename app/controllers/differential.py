@@ -27,12 +27,12 @@ from app.common.flame_graph import get_differential_flame_graph
 from app import config
 
 
-def generate_differential_flame_graph(filename, file_type, compare_filename, compare_type, start, end, compare_start, compare_end):
+def generate_differential_flame_graph(filename, file_type, compare_filename, compare_type, start, end, compare_start, compare_end, which='samples'):
     file_path_1 = join(config.PROFILE_DIR, filename)
     mtime_1 = getmtime(file_path_1)
     flame_graph_1 = None
     if file_type == 'perf':
-        flame_graph_1 = perf_generate_flame_graph(file_path_1, start, end)
+        flame_graph_1 = perf_generate_flame_graph(file_path_1, start, end, which)
     elif file_type == 'cpuprofile':
         flame_graph_1 = cpuprofile_generate_flame_graph(file_path_1, start, end)
     elif file_type == 'trace_event':
@@ -46,7 +46,7 @@ def generate_differential_flame_graph(filename, file_type, compare_filename, com
     mtime_2 = getmtime(file_path_2)
     flame_graph_2 = None
     if compare_type == 'perf':
-        flame_graph_2 = perf_generate_flame_graph(file_path_2, compare_start, compare_end)
+        flame_graph_2 = perf_generate_flame_graph(file_path_2, compare_start, compare_end, which)
     elif compare_type == 'cpuprofile':
         flame_graph_2 = cpuprofile_generate_flame_graph(file_path_2, compare_start, compare_end)
     elif compare_type == 'trace_event':

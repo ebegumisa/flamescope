@@ -25,8 +25,6 @@ from app.perf.regexp import event_regexp, coeff_regexp, idle_regexp, comm_regexp
 from app.common.fileutil import get_file
 from app.common.libtype import library2type
 
-from .heatmap import which_heatmap
-
 stack_times = {}        # cached start and end times for profiles
 stack_mtimes = {}       # modification timestamp for profiles
 stack_index = {}        # cached event times
@@ -119,7 +117,7 @@ def _add_stack(root, stack, comm, coeff):
 
 
 # return stack samples for a given range
-def perf_generate_flame_graph(file_path, range_start=None, range_end=None):
+def perf_generate_flame_graph(file_path, range_start=None, range_end=None, which='samples'):
     # calculate profile file range
     r = _get_profile_range(file_path)
     start = r.start
@@ -200,12 +198,11 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None):
             ts = float(r.group(1))
             if (ts > end + overscan):
                 break
-            if which_heatmap == 'samples':
+            if which == 'samples':
                 coeff = 1
             else:
-                for (k, v) in coeff_regexp.findall(line):
-                    #coeffs.append((k, int(v)))
-                    if k == which_heatmap:
+                for (k, v) in coeff_regexp.findall(line): # FIXME: This ought not to be a linear search
+                    if k == which:
                         coeff = int(v)
                         break
             r = comm_regexp.search(line)
