@@ -115,4 +115,4 @@ def generate_heatmap(filename, file_type, rows=None):
         heatmap['maxvalue'] = maxvalue
         heatmaps['samples'] = heatmap
 
-    return heatmap[which_heatmap]
+    return heatmaps

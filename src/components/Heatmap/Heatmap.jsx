@@ -64,7 +64,7 @@ class Heatmap extends Component {
         super(props);
 
         [
-            'drawHeatmap',
+            'drawHeatmaps',
             'handleSettingsClose',
             'handleSettingsOpen',
             'handleApply',
@@ -104,7 +104,7 @@ class Heatmap extends Component {
                 this.setState({data: data, loading: false})
             })
             .then( () => {
-                this.drawHeatmap()
+                this.drawHeatmaps()
             })
             .catch((error) => {
                 error.response.json()
@@ -117,17 +117,22 @@ class Heatmap extends Component {
             })
     }
 
-    drawHeatmap() {
-        const self = this
+    drawHeatmaps() {
         const { data , enhanceColors} = this.state;
+        for (const heatName in data)
+            this.drawHeatmap(heatName, data[heatName], enhanceColors)
+    }
+
+    drawHeatmap = (heatName, data, enhanceColors) => {
+        const self = this
         const { filename, type, compareType, compareFilename, compareStart, compareEnd } = this.props.match.params
 
-        const heatmapNode = document.getElementById('heatmap')
+        const heatmapNode = document.getElementById(`heatmap_${heatName}`)
         while (heatmapNode.firstChild) {
             heatmapNode.removeChild(heatmapNode.firstChild)
         }
 
-        const legendNode = document.getElementById('legend')
+        const legendNode = document.getElementById(`legend_${heatName}`)
         while (legendNode.firstChild) {
             legendNode.removeChild(legendNode.firstChild)
         }
@@ -152,12 +157,12 @@ class Heatmap extends Component {
         }
 
         function onMouseOver(d, i, j) {
-            document.getElementById("details").innerHTML = "second: " + data.columns[i] + ", millisecond: " + data.rows[j] + ", count: " + d
+            document.getElementById("details_" + heatName).innerHTML = "second: " + data.columns[i] + ", millisecond: " + data.rows[j] + ", count: " + d
             hover([i, j])
         }
 
         const chart = heatmap()
-            .title("")
+            .title(heatName)
             .subtitle("")
             .legendLabel("Count")
             .legendScaleTicks(legendTicks)
@@ -173,6 +178,7 @@ class Heatmap extends Component {
             .colorScale(scaleLinear()
                 .domain( enhanceColors ? [0, 1, 3, data.maxvalue/2, data.maxvalue] : [0, data.maxvalue/2 , data.maxvalue])
                 .range( enhanceColors ? heatmapColors.enhanced : heatmapColors.default)
+                
             )
             .margin({
                 top: 40,
@@ -180,7 +186,7 @@ class Heatmap extends Component {
                 bottom: 10,
                 left: 3
             })
-            .legendElement("#legend")
+            .legendElement(`#legend_${heatName}`)
             .legendHeight(50)
             .legendWidth(300)
             .legendMargin({top: 0, right: 0, bottom: 30, left: 0})
@@ -250,7 +256,7 @@ class Heatmap extends Component {
             return cellA[0] == cellB[0] && cellA[1] > cellB[1]
         }
 
-        select("#heatmap")
+        select(`#heatmap_${heatName}`)
             .datum(data.values)
             .call(chart)
 
@@ -311,7 +317,7 @@ class Heatmap extends Component {
         this.setState(
             {enhanceColors: !this.state.enhanceColors},
             function() {
-                this.drawHeatmap()
+                this.drawHeatmaps()
             }
         )
     }
@@ -395,34 +401,39 @@ class Heatmap extends Component {
                         </Grid.Column>
                     </Grid>
                     <Divider />
-                    <div
-                        ref={`heatmap`}
-                        id={`heatmap`}
-                        key={`heatmap`}
-                        className={`heatmap`}
-                    />
-                    <div
-                        ref={`legend`}
-                        id={`legend`}
-                        key={`legend`}
-                        className={`legend`}
-                    />
-                    <Divider />
-                    <Grid>
-                        <Grid.Column width={12}>
-                            <div
-                                ref={`details`}
-                                id={`details`}
-                                key={`details`}
-                                style={styles.details}
-                            />
-                        </Grid.Column>
-                        <Grid.Column width={4} textAlign='right'>
-                            <Button icon labelPosition='right' onClick={this.handleFullProfileClick}>
-                                Whole Profile
-                                <Icon name='right arrow' />
-                            </Button>
-                        </Grid.Column>
+                    <Grid divided={'vertically'}>
+                        {
+                            Object.keys(this.state.data).map(heatName =>
+                                <Grid.Row key={heatName}>
+                                    <div
+                                        ref={`heatmap_${heatName}`}
+                                        id={`heatmap_${heatName}`}
+                                        key={`heatmap_${heatName}`}
+                                        className={`heatmap`}
+                                    />
+                                    <div
+                                        ref={`legend_${heatName}`}
+                                        id={`legend_${heatName}`}
+                                        key={`legend_${heatName}`}
+                                        className={`legend`}
+                                    />
+                                    <Divider />
+                                    <Grid.Column width={12}>
+                                        <div
+                                            ref={`details_${heatName}`}
+                                            id={`details_${heatName}`}
+                                            key={`details_${heatName}`}
+                                            style={styles.details}
+                                        />
+                                    </Grid.Column>
+                                    <Grid.Column width={4} textAlign='right'>
+                                        <Button icon labelPosition='right' onClick={this.handleFullProfileClick}>
+                                            Whole Profile
+                                            <Icon name='right arrow' />
+                                        </Button>
+                                    </Grid.Column>
+                                </Grid.Row>)
+                        }
                     </Grid>
                 </Container>
             </div>
