@@ -68,7 +68,8 @@ class FileList extends Component {
 
     handleHeatmapClick(type, filename) {
         const { compareType, compareFilename, compareStart, compareEnd } = this.props.match.params
-
+        const which = (new URLSearchParams(this.props.location.search)).get("which")
+        
         let url = `/heatmap/${type}/${filename}`
 
         if (compareType && compareFilename) {
@@ -78,7 +79,9 @@ class FileList extends Component {
             }
             url += `/heatmap/${type}/${filename}`
         }
-
+        if (which)
+            url += `?which=${which}`
+        
         this.props.history.push(url)
     }
 
@@ -134,6 +137,7 @@ class FileList extends Component {
 FileList.propTypes = {
     history: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
+    location: PropTypes.string.isRequired
 }
 
 export default FileList

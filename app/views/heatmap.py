@@ -31,10 +31,11 @@ def get_heatmap():
     filename = request.args.get('filename')
     file_type = request.args.get('type')
     rows = request.args.get('rows', None)
+    which = request.args.get('which', None)
     if rows is not None:
         rows = int(rows)
     try:
-        heatmap = generate_heatmap(filename, file_type, rows)
+        heatmap = generate_heatmap(filename, file_type, rows, which)
         return jsonify(heatmap)
     except InvalidFileError as err:
         abort(500, err.message)

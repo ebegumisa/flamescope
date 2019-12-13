@@ -93,9 +93,14 @@ class Heatmap extends Component {
     fetchData() {
         const { filename, type } = this.props.match.params
         const { rows } = this.state
-
-        this.setState({loading: true})
-        fetch(`/heatmap/?filename=${filename}&type=${type}&rows=${rows}`)
+        const which = (new URLSearchParams(this.props.location.search)).get("which")
+        
+        let path = `/heatmap/?filename=${filename}&type=${type}&rows=${rows}`
+        if (which)
+            path += `&which=${which}`
+        
+            this.setState({loading: true})
+        fetch(path)
             .then(checkStatus)
             .then(res => {
                 return res.json()
@@ -118,7 +123,7 @@ class Heatmap extends Component {
     }
 
     drawHeatmaps() {
-        const { data , enhanceColors} = this.state;
+        const { data, enhanceColors } = this.state;
         
         for (const heatName in data)
             this.drawHeatmap(heatName, data[heatName], enhanceColors)
@@ -449,6 +454,7 @@ class Heatmap extends Component {
 Heatmap.propTypes = {
     match: PropTypes.object.isRequired,
     history: PropTypes.object.isRequired,
+    location: PropTypes.object.isRequired,
 }
 
 const mapStateToProps = () => {

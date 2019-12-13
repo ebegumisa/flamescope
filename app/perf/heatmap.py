@@ -22,7 +22,7 @@ from .regexp import event_regexp, coeff_regexp, idle_regexp
 from app.common.fileutil import get_file
 
 # read and cache offsets
-def perf_read_offsets(file_path):
+def perf_read_offsets(file_path, which=None):
     start = float("+inf")
     end = float("-inf")
     offsets = []
@@ -52,8 +52,9 @@ def perf_read_offsets(file_path):
             if (ts < start):
                 start = ts
             coeffs = [('samples', 1)]
-            for (k, v) in coeff_regexp.findall(line):
-                coeffs.append((k, int(v)))
+            if which and which != 'samples':
+                for (k, v) in coeff_regexp.findall(line):
+                    coeffs.append((k, int(v)))
             stack = line.rstrip()
         else:
             stack += line.rstrip()
