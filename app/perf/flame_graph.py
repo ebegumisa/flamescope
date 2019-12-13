@@ -21,9 +21,11 @@ import collections
 from flask import abort
 from os.path import getmtime
 from math import ceil, floor
-from app.perf.regexp import event_regexp, idle_regexp, comm_regexp, frame_regexp
+from app.perf.regexp import event_regexp, coeff_regexp, idle_regexp, comm_regexp, frame_regexp
 from app.common.fileutil import get_file
 from app.common.libtype import library2type
+
+from .heatmap import which_heatmap
 
 stack_times = {}        # cached start and end times for profiles
 stack_mtimes = {}       # modification timestamp for profiles
@@ -90,9 +92,8 @@ def _add_stack(root, stack, comm, coeff):
         for j, name in enumerate(names):
             val = 0
             # only adding value to the top of the stack
-            if i == (len(stack) - 1):
-                if j == (len(names) - 1):
-                    val = 1
+            if coeff != 0 and i == (len(stack) - 1) and j == (len(names) - 1):
+                val = coeff
             # strip leading "L" from java symbols (only reason we need comm):
             if (comm == "java" and name.startswith("L")):
                 name = name[1:]
@@ -105,13 +106,13 @@ def _add_stack(root, stack, comm, coeff):
                     found = 1
                     break
             if (found):
-                last['v'] += val * coeff
+                last['v'] += val 
             else:
                 newframe = {}
                 newframe['c'] = []
                 newframe['n'] = name
                 newframe['l'] = libtype
-                newframe['v'] = val * coeff
+                newframe['v'] = val
                 last['c'].append(newframe)
                 last = newframe
     return root
@@ -168,7 +169,7 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None):
     # - event_regexp: to identify event timestamps
     # - idle_regexp: for filtering idle stacks
     linenum = -1
-    coeff = 1
+    coeff = 0
     for line in f:
         linenum += 1
         # Performance optimization. Makes a large difference.
@@ -199,7 +200,14 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None):
             ts = float(r.group(1))
             if (ts > end + overscan):
                 break
-            coeff = 1 if r.group(2) == None else float(r.group(2))
+            if which_heatmap == 'samples':
+                coeff = 1
+            else:
+                for (k, v) in coeff_regexp.findall(line):
+                    #coeffs.append((k, int(v)))
+                    if k == which_heatmap:
+                        coeff = int(v)
+                        break
             r = comm_regexp.search(line)
             if (r):
                 comm = r.group(1).rstrip()
