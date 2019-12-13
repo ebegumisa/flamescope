@@ -201,6 +201,7 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None, which
             if which == 'samples':
                 coeff = 1
             else:
+                ceoff = 0
                 for (k, v) in coeff_regexp.findall(line): # FIXME: This ought not to be a linear search
                     if k == which:
                         coeff = int(v)

@@ -85,8 +85,6 @@ def generate_heatmap(filename, file_type, rows=None, which=None):
             col = int(floor(ts - floor(start)))
             row = rows - int(floor(rows * (ts % 1))) - 1
             for (name, coeff) in coeffs:
-                if which and which != name: #FIXME: This ought not to be a linear search
-                    continue
                 if name in heatmaps:
                     heatmap = heatmaps[name]
                 else:

@@ -52,9 +52,15 @@ def perf_read_offsets(file_path, which=None):
             if (ts < start):
                 start = ts
             coeffs = [('samples', 1)]
-            if which and which != 'samples':
+            if not which:
                 for (k, v) in coeff_regexp.findall(line):
                     coeffs.append((k, int(v)))
+            else:
+                if which != 'samples':
+                    for (k, v) in coeff_regexp.findall(line): #FIXME: This ought not to be a linear search
+                        if k == which:
+                            coeffs.append((k, int(v)))
+                            break
             stack = line.rstrip()
         else:
             stack += line.rstrip()
