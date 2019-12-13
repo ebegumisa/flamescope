@@ -43,7 +43,8 @@ def get_differential_flame_graph():
     compare_end = request.args.get('compareEnd', None)
     if compare_end is not None:
         compare_end = float(compare_end)
-
+    which = request.args.get('which', None)
+    
     differential_flame_graph = generate_differential_flame_graph(
-        filename, file_type, compare_filename, compare_type, start, end, compare_start, compare_end)
+        filename, file_type, compare_filename, compare_type, start, end, compare_start, compare_end, which)
     return jsonify(differential_flame_graph)

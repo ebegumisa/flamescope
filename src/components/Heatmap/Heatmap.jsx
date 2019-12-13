@@ -119,6 +119,7 @@ class Heatmap extends Component {
 
     drawHeatmaps() {
         const { data , enhanceColors} = this.state;
+        
         for (const heatName in data)
             this.drawHeatmap(heatName, data[heatName], enhanceColors)
     }
@@ -225,6 +226,7 @@ class Heatmap extends Component {
                     }
                     url += `/compare/${type}/${filename}/${heatmap2time(selectStart)}/${heatmap2time(selectEnd, true)}`
                 }
+                url += `?which=${heatName}`
 
                 self.props.history.push(url)
             } else {
@@ -326,7 +328,7 @@ class Heatmap extends Component {
         this.props.history.goBack();
     }
 
-    handleFullProfileClick() {
+    handleFullProfileClick(heatName) {
         const { filename, type, compareType, compareFilename, compareStart, compareEnd } = this.props.match.params
 
         let url = `/flamegraph/${type}/${filename}`
@@ -338,7 +340,8 @@ class Heatmap extends Component {
             }
             url += `/compare/${type}/${filename}`
         }
-
+        url += `?which=${heatName}`
+        
         this.props.history.push(url)
     }
 
@@ -427,7 +430,9 @@ class Heatmap extends Component {
                                         />
                                     </Grid.Column>
                                     <Grid.Column width={4} textAlign='right'>
-                                        <Button icon labelPosition='right' onClick={this.handleFullProfileClick}>
+                                        <Button icon labelPosition='right' 
+                                                onClick={() => this.handleFullProfileClick(heatName) }
+                                            >   
                                             Whole Profile
                                             <Icon name='right arrow' />
                                         </Button>

@@ -103,6 +103,7 @@ class FlameGraph extends Component {
         const { type, filename, start, end, compareType, compareFilename, compareStart, compareEnd } = this.props.match.params
         const { compare } = this.props
         const { packageName } = this.state
+        const which = (new URLSearchParams(this.props.location.search)).get("which")
 
         let url = `/flamegraph/?filename=${filename}&type=${type}&packageName=${packageName ? 'true' : 'false'}`
 
@@ -119,7 +120,10 @@ class FlameGraph extends Component {
         if (compareStart && compareEnd) {
             url += `&compareStart=${compareStart}&compareEnd=${compareEnd}`
         }
-
+        
+        if (which)
+            url += `&which=${which}`
+        
         this.setState({loading: true})
 
         fetch(url)
@@ -235,20 +239,24 @@ class FlameGraph extends Component {
 
     handleCompareClick() {
         const { type, filename, start, end } = this.props.match.params
-
+        const which = (new URLSearchParams(this.props.location.search)).get("which")
+        
         let url = `/#/compare/${type}/${filename}`
 
         if (start && end) {
             url += `/${start}/${end}`
         }
-
+        if (which)
+            url += `?which=${which}`
+    
         window.location.href = url
     }
 
     handleFlipClick() {
         const { type, filename, start, end, compareType, compareFilename, compareStart, compareEnd } = this.props.match.params
         const { compare } = this.props
-
+        const which = (new URLSearchParams(this.props.location.search)).get("which")
+        
         let url = `/${compare}/${compareType}/${compareFilename}`
         if (compareStart && compareEnd) {
             url += `/${compareStart}/${compareEnd}`
@@ -257,6 +265,8 @@ class FlameGraph extends Component {
         if (start && end) {
             url += `/${start}/${end}`
         }
+        if (which)
+            url += `?which=${which}`
         
         this.props.history.push(url)
     }
@@ -265,6 +275,8 @@ class FlameGraph extends Component {
     handleElidedDifferentialFlipClick() {
         const { type, filename, start, end, compareType, compareFilename, compareStart, compareEnd } = this.props.match.params
         const { compare } = this.props
+        const which = (new URLSearchParams(this.props.location.search)).get("which")
+        
 
         let url = `/${compare === 'differential' ? 'elided' : 'differential'}/${type}/${filename}`
         if (start && end) {
@@ -274,7 +286,9 @@ class FlameGraph extends Component {
         if (compareStart && compareEnd) {
             url += `/${compareStart}/${compareEnd}`
         }
-        
+        if (which)
+            url += `?which=${which}`
+
         this.props.history.push(url)
     }
 

@@ -37,5 +37,7 @@ def get_flame_graph():
     range_end = request.args.get('end', None)
     if range_end is not None:
         range_end = float(range_end)
-    flame_graph = generate_flame_graph(filename, file_type, range_start, range_end, package_name)
+    which = request.args.get('which', None)
+    
+    flame_graph = generate_flame_graph(filename, file_type, range_start, range_end, package_name, which)
     return jsonify(flame_graph)
