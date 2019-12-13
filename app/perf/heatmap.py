@@ -18,9 +18,10 @@
 #    limitations under the License.
 
 import collections
-from .regexp import event_regexp, idle_regexp
+from .regexp import event_regexp, coeff_regexp, idle_regexp
 from app.common.fileutil import get_file
 
+which_heatmap = 'erlang_reductions'
 
 # read and cache offsets
 def perf_read_offsets(file_path):
@@ -32,7 +33,7 @@ def perf_read_offsets(file_path):
 
     stack = ""
     ts = -1
-    coeff = 1
+    coeffs = []
 
     # process perf script output and search for two things:
     # - event_regexp: to identify event timestamps
@@ -46,19 +47,21 @@ def perf_read_offsets(file_path):
             if (stack != ""):
                 # process prior stack
                 if (not idle_regexp.search(stack)):
-                    offsets.append((ts, coeff))
+                    offsets.append((ts, coeffs))
                 # don't try to cache stacks (could be many Gbytes):
                 stack = ""
             ts = float(r.group(1))
             if (ts < start):
                 start = ts
-            coeff = 1 if r.group(2) == None else float(r.group(2))
+            coeffs = [('samples', 1)]
+            for (k, v) in coeff_regexp.findall(line):
+                coeffs.append((k, int(v)))
             stack = line.rstrip()
         else:
             stack += line.rstrip()
     # last stack
     if (not idle_regexp.search(stack)):
-        offsets.append((ts, coeff))
+        offsets.append((ts, coeffs))
     if (ts > end):
         end = ts
 

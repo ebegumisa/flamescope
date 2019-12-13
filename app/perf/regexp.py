@@ -72,7 +72,10 @@ import re
 #
 # This event_regexp matches the event line, and puts time in the first group:
 #
-event_regexp = re.compile(r" +([0-9.]+): .+?:[\t ]*(?:coefficient:[\t ]*(-?[0-9.]+))?")
+
+#https://docs.python.org/3/howto/regex.html
+event_regexp = re.compile(r" +([0-9.]+): .+?:")
+coeff_regexp = re.compile(r"\bcoeff_([^:]+):[\t ](-?[0-9.]+)\b")
 frame_regexp = re.compile(r"^[\t ]*[0-9a-fA-F]+ (.+) \((.*?)\)$")
 comm_regexp = re.compile(r"^ *([^0-9]+)")
 

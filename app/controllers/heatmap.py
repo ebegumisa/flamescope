@@ -20,11 +20,12 @@
 from math import ceil, floor
 from os.path import join, getmtime
 from app import config
-from app.perf.heatmap import perf_read_offsets
+from app.perf.heatmap import perf_read_offsets, which_heatmap
 from app.cpuprofile.heatmap import cpuprofile_read_offsets
 from app.nflxprofile.heatmap import nflxprofile_readoffsets
 from app.trace_event.heatmap import trace_event_read_offsets
 from app.common.error import InvalidFileError
+import copy
 
 # global defaults
 YRATIO = 1000  # milliseconds
@@ -78,24 +79,45 @@ def generate_heatmap(filename, file_type, rows=None):
         values.append(emptycol)
     # increment heatmap cells
     if (file_type == 'perf'):
-        for (ts, coeff) in offsets:
+        heatmaps = {}
+        heatmaps['samples'] = {}
+        heatmap = heatmaps['samples']
+        heatmap['rows'] = rowoffsets
+        heatmap['columns'] = timeoffsets
+        heatmap['values'] = copy.deepcopy(values)
+        heatmap['maxvalue'] = 0
+        for (ts, coeffs) in offsets:
             col = int(floor(ts - floor(start)))
             row = rows - int(floor(rows * (ts % 1))) - 1
-            values[col][row] += (1 * coeff)
-            if (values[col][row] > maxvalue):
-                maxvalue = values[col][row]
+            heatmap['values'][col][row] += 1
+            if (heatmap['values'][col][row] > heatmap['maxvalue']):
+                heatmap['maxvalue'] = heatmap['values'][col][row]
+            for (k, v) in coeffs:
+                if k in heatmaps:
+                    heatmap_k = heatmaps[k]
+                else:
+                    heatmaps[k] = {}
+                    heatmap_k = heatmaps[k]
+                    heatmap_k['rows'] = rowoffsets
+                    heatmap_k['columns'] = timeoffsets
+                    heatmap_k['values'] = copy.deepcopy(values)
+                    heatmap_k['maxvalue'] = 0
+                heatmap_k['values'][col][row] += v
+                if (heatmap_k['values'][col][row] > heatmap_k['maxvalue']):
+                    heatmap_k['maxvalue'] = heatmap_k['values'][col][row]
+        return heatmaps[which_heatmap]
     else:
-        for ts in offsets:
+        #for ts in offsets:
+        for (ts, coeffs) in offsets:
             col = int(floor(ts - floor(start)))
             row = rows - int(floor(rows * (ts % 1))) - 1
             values[col][row] += 1
             if (values[col][row] > maxvalue):
                 maxvalue = values[col][row]
+        heatmap = {}
+        heatmap['rows'] = rowoffsets
+        heatmap['columns'] = timeoffsets
+        heatmap['values'] = values
+        heatmap['maxvalue'] = maxvalue
 
-    heatmap = {}
-    heatmap['rows'] = rowoffsets
-    heatmap['columns'] = timeoffsets
-    heatmap['values'] = values
-    heatmap['maxvalue'] = maxvalue
-
-    return heatmap
+        return heatmap
