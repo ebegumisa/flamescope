@@ -77,7 +77,7 @@ def generate_heatmap(filename, file_type, rows=None, which=None):
     for i in range(0, cols):
         emptycol = []
         for i in range(0, rows):
-            emptycol.append(0)
+            emptycol.append(None)
         emptyvalues.append(emptycol)
     # increment heatmap cells
     if (file_type == 'perf'):
@@ -94,7 +94,10 @@ def generate_heatmap(filename, file_type, rows=None, which=None):
                     heatmap['columns'] = timeoffsets
                     heatmap['values'] = copy.deepcopy(emptyvalues)
                     heatmap['maxvalue'] = 0
-                heatmap['values'][col][row] += coeff
+                if heatmap['values'][col][row] == None:
+                    heatmap['values'][col][row] = coeff
+                else:
+                    heatmap['values'][col][row] += coeff
                 value = heatmap['values'][col][row]
                 if (value > heatmap['maxvalue']):
                     heatmap['maxvalue'] = value
