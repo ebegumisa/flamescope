@@ -90,7 +90,7 @@ def _add_stack(root, stack, comm, coeff):
         for j, name in enumerate(names):
             val = 0
             # only adding value to the top of the stack
-            if coeff != 0 and i == (len(stack) - 1) and j == (len(names) - 1):
+            if i == (len(stack) - 1) and j == (len(names) - 1):
                 val = coeff
             # strip leading "L" from java symbols (only reason we need comm):
             if (comm == "java" and name.startswith("L")):
@@ -137,8 +137,22 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None, which
         print("ERROR: Bad range, %s -> %s." % (str(start), str(end)))
         return abort(416)
 
+    positive = {
+        'n': 'positive',
+        'l': '',
+        'v': 0,
+        'c': []
+    }
+
+    negative = {
+        'n': 'negative',
+        'l': '',
+        'v': 0,
+        'c': []
+    }
+
     root = {}
-    root['c'] = []
+    root['c'] = [positive, negative]
     root['n'] = "root"
     root['l'] = ""
     root['v'] = 0
@@ -193,7 +207,10 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None, which
                     # skip idle
                     stack = []
                 elif (ts >= start and ts <= end):
-                    root = _add_stack(root, stack, comm, coeff)
+                    if coeff < 0:
+                        negative = _add_stack(negative, stack, comm, -coeff)
+                    else:
+                        positive = _add_stack(positive, stack, comm, coeff)
                 stack = []
             ts = float(r.group(1))
             if (ts > end + overscan):
@@ -223,7 +240,10 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None, which
                 stack.insert(1, [name, r.group(2)])
     # last stack
     if (ts >= start and ts <= end):
-        root = _add_stack(root, stack, comm, coeff)
+        if coeff < 0:
+            negative = _add_stack(negative, stack, comm, -coeff)
+        else:
+            positive = _add_stack(positive, stack, comm, coeff)
 
     # close file
     f.close()
