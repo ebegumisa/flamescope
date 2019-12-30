@@ -27,7 +27,7 @@ from app.common.fileutil import get_profile_type
 # get profile files
 def get_profile_list():
     all_files = []
-    for root, dirs, files in walk(join(config.PROFILE_DIR)):
+    for root, dirs, files in walk(join(config.PROFILE_DIR), followlinks=True):
         start = root[len(config.PROFILE_DIR) + 1:]
         for f in files:
             if not f.startswith('.'):
