@@ -75,7 +75,7 @@ import re
 
 #https://docs.python.org/3/howto/regex.html
 event_regexp = re.compile(r" +([0-9.]+): .+?:")
-coeff_regexp = re.compile(r"\bcoeff_([^:]+):[\t ](-?[0-9.]+)\b")
+metric_regexp = re.compile(r"\bmetric_([^:]+):[\t ](-?[0-9.]+)[\t ]*,[\t ]*(-?[0-9.]+)\b")
 frame_regexp = re.compile(r"^[\t ]*[0-9a-fA-F]+ (.+) \((.*?)\)$")
 comm_regexp = re.compile(r"^ *([^0-9]+)")
 

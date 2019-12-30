@@ -21,9 +21,10 @@ import collections
 from flask import abort
 from os.path import getmtime
 from math import ceil, floor
-from app.perf.regexp import event_regexp, coeff_regexp, idle_regexp, comm_regexp, frame_regexp
+from app.perf.regexp import event_regexp, metric_regexp, idle_regexp, comm_regexp, frame_regexp
 from app.common.fileutil import get_file
 from app.common.libtype import library2type
+import copy
 
 stack_times = {}        # cached start and end times for profiles
 stack_mtimes = {}       # modification timestamp for profiles
@@ -219,10 +220,11 @@ def perf_generate_flame_graph(file_path, range_start=None, range_end=None, which
                 coeff = 1
             else:
                 ceoff = 0
-                for (k, v) in coeff_regexp.findall(line): # FIXME: This ought not to be a linear search
+                for (k, v, d) in metric_regexp.findall(line): # FIXME: This ought not to be a linear search
                     if k == which:
                         coeff = int(v)
-                        break
+                    elif k + '_delta' == which:
+                        coeff = int(d)
             r = comm_regexp.search(line)
             if (r):
                 comm = r.group(1).rstrip()

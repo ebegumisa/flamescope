@@ -18,7 +18,7 @@
 #    limitations under the License.
 
 import collections
-from .regexp import event_regexp, coeff_regexp, idle_regexp
+from .regexp import event_regexp, metric_regexp, idle_regexp
 from app.common.fileutil import get_file
 
 # read and cache offsets
@@ -53,12 +53,14 @@ def perf_read_offsets(file_path, which=None):
                 start = ts
             coeffs = [('samples', 1)]
             if not which:
-                for (k, v) in coeff_regexp.findall(line):
+                for (k, v, d) in metric_regexp.findall(line):
+                    coeffs.append((k + '_delta', int(d)))
                     coeffs.append((k, int(v)))
             else:
                 if which != 'samples':
-                    for (k, v) in coeff_regexp.findall(line): #FIXME: This ought not to be a linear search
+                    for (k, v, d) in metric_regexp.findall(line): #FIXME: This ought not to be a linear search
                         if k == which:
+                            coeffs.append((k + '_delta', int(d)))
                             coeffs.append((k, int(v)))
                             break
             stack = line.rstrip()
