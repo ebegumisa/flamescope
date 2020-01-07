@@ -93,15 +93,19 @@ def generate_heatmap(filename, file_type, rows=None, which=None):
                     heatmap['rows'] = rowoffsets
                     heatmap['columns'] = timeoffsets
                     heatmap['values'] = copy.deepcopy(emptyvalues)
+                    heatmap['minvalue'] = 0
                     heatmap['maxvalue'] = 0
                 if heatmap['values'][col][row] == None:
                     heatmap['values'][col][row] = coeff
                 else:
                     heatmap['values'][col][row] += coeff
                 value = heatmap['values'][col][row]
+                if (value < heatmap['minvalue']):
+                    heatmap['minvalue'] = value
                 if (value > heatmap['maxvalue']):
                     heatmap['maxvalue'] = value
     else:
+        minvalue = 0
         maxvalue = 0
         values = emptyvalues
         for ts in offsets:
@@ -109,12 +113,15 @@ def generate_heatmap(filename, file_type, rows=None, which=None):
             row = rows - int(floor(rows * (ts % 1))) - 1
             values[col][row] += 1
             value = values[col][row]
+            if (value < minvalue):
+                minvalue = value
             if (value > maxvalue):
                 maxvalue = value
         heatmap = {}
         heatmap['rows'] = rowoffsets
         heatmap['columns'] = timeoffsets            
         heatmap['values'] = values
+        heatmap['minvalue'] = minvalue
         heatmap['maxvalue'] = maxvalue
         heatmaps['samples'] = heatmap
 
