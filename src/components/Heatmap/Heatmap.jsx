@@ -55,8 +55,10 @@ const rowsOptions = [
 ]
 
 const heatmapColors = {
-  default:  ['#FFFFFF', '#FF5032', '#E50914'],
-  enhanced: ['#FFFFFF', '#6AAAFF', '#FAA0B5', '#FF5032', '#E50914']
+  defaultUnsigned:  ['#FFFFFF', '#FF5032', '#E50914'],
+  defaultSigned:  ['#09E565', '#32FFBE', '#FFFFFF', '#FF5032', '#E50914'],
+  enhancedUnsigned: ['#FFFFFF', '#6AAAFF', '#FAA0B5', '#FF5032', '#E50914'],
+  enhancedSigned: ['#09E565', '#32FFBE', '#FAA0EB', '#D06AFF', '#FFFFFF', '#6AAAFF', '#FAA0B5', '#FF5032', '#E50914']
 }
 
 class Heatmap extends Component {
@@ -182,8 +184,14 @@ class Heatmap extends Component {
             .onClick(onClick)
             .onMouseOver(onMouseOver)
             .colorScale(scaleLinear()
-                .domain( enhanceColors ? [0, 1, 3, data.maxvalue/2, data.maxvalue] : [0, data.maxvalue/2 , data.maxvalue])
-                .range( enhanceColors ? heatmapColors.enhanced : heatmapColors.default)
+                .domain( data.minvalue == 0 
+                            ? (enhanceColors ? [0, 1, 3, data.maxvalue/2, data.maxvalue] 
+                                             : [0, data.maxvalue/2 , data.maxvalue])
+                            : (enhanceColors ? [data.minvalue, data.minvalue/2, -3, -1, 0, 1, 3, data.maxvalue/2, data.maxvalue] 
+                                             : [data.minvalue, data.minvalue/2, 0, data.maxvalue/2 , data.maxvalue]))
+                .range( data.minvalue == 0
+                            ? (enhanceColors ? heatmapColors.enhancedUnsigned : heatmapColors.defaultUnsigned)
+                            : (enhanceColors ? heatmapColors.enhancedSigned : heatmapColors.defaultSigned))
                 
             )
             .margin({
